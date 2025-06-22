@@ -1,6 +1,6 @@
 from sqlmodel import Session, SQLModel, select
 
-from app.models.graph_model import Graph, Node, Edge, TrafficLight
+from app.models.graph_model import Graph, Node, Edge, TrafficLight, TrafficLightDelta
 from app.db.session import engine
 
 coordinates = [
@@ -55,7 +55,9 @@ def create_data():
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
         graph = Graph(name='大世界上班', start_node_id=13, end_node_id=12)
+        traffic_light_delta = TrafficLightDelta(id=1, delta=0)
         session.add(graph)
+        session.add(traffic_light_delta)
         session.commit()
         graph_id = graph.id
         for index, coordinate in enumerate(coordinates):
@@ -70,8 +72,9 @@ def create_data():
             edge.set_length()
             session.add(edge)
             session.commit()
-        for traffic_light in traffic_lights:
+        for index, traffic_light in enumerate(traffic_lights):
             traffic_light = TrafficLight(
+                id=index,
                 edge_id=traffic_light[0],
                 period=traffic_light[1],
                 pass_interval=traffic_light[2],

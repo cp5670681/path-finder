@@ -90,18 +90,30 @@ class TrafficLight(BaseModel, table=True):
     def end_moment(self):
         return self.start_moment + self.pass_interval
 
+    def get_start_moment(self, delta):
+        return self.start_moment + delta
+
+    def get_end_moment(self, delta):
+        return self.end_moment + delta
+
     # 获取后面可经过的时间区间（只获取最近2次）
-    def get_next_time_interval(self, moment):
-        n = (moment - self.end_moment) // self.period + 1
-        yield [self.start_moment + n * self.period, self.end_moment + n * self.period]
+    def get_next_time_interval(self, moment, delta):
+        n = (moment - self.get_end_moment(delta)) // self.period + 1
+        yield [self.get_start_moment(delta) + n * self.period, self.get_end_moment(delta) + n * self.period]
         n += 1
-        yield [self.start_moment + n * self.period, self.end_moment + n * self.period]
+        yield [self.get_start_moment(delta) + n * self.period, self.get_end_moment(delta) + n * self.period]
 
     # 获取等待时间
-    def get_wait_time(self, moment, velocity):
-        for interval in self.get_next_time_interval(moment):
+    def get_wait_time(self, moment, velocity, delta):
+        for interval in self.get_next_time_interval(moment, delta):
             if moment <= interval[1] - self.edge.length / velocity:
                 return max(moment, interval[0]) - moment
+
+
+# 红绿灯修正值（所有红绿灯的时间都要加这个数）
+class TrafficLightDelta(BaseModel, table=True):
+    __tablename__ = "traffic_light_deltas"
+    delta: int
 
 # 图
 class Graph(BaseModel, table=True):
@@ -132,7 +144,7 @@ class Graph(BaseModel, table=True):
         return results
 
 
-    def dijkstra(self, moment, velocity):
+    def dijkstra(self, moment, velocity, delta):
         # 总花费时间
         all_take_time = 0
         # 总等待时间
@@ -158,7 +170,7 @@ class Graph(BaseModel, table=True):
             for edge in adjacency_list[min_node_id]:
                 if not visited_dict[edge.end_node_id]:
                     traffic_light = edge.traffic_light
-                    wait_time = traffic_light.get_wait_time(arrive_moment_dict[min_node_id], velocity) if traffic_light else 0
+                    wait_time = traffic_light.get_wait_time(arrive_moment_dict[min_node_id], velocity, delta) if traffic_light else 0
                     new_duration = minimum_duration_dict[min_node_id] + wait_time + edge.length / velocity
                     if new_duration < minimum_duration_dict[edge.end_node_id]:
                         minimum_duration_dict[edge.end_node_id] = new_duration
