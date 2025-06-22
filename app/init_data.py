@@ -17,6 +17,7 @@ coordinates = [
     [121.480053, 31.229736],
     [121.481382, 31.230493],
     [121.481438, 31.230521],
+    [121.47958,31.227775],
 ]
 
 edges = [
@@ -37,7 +38,8 @@ edges = [
     [4, 9],
     [5, 10],
     [8, 11],
-    [9, 12]
+    [9, 12],
+    [13,0]
 ]
 
 traffic_lights = [
@@ -52,7 +54,7 @@ def create_data():
     SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
     with Session(engine) as session:
-        graph = Graph(name='大世界上班', start_node_id=0, end_node_id=12)
+        graph = Graph(name='大世界上班', start_node_id=13, end_node_id=12)
         session.add(graph)
         session.commit()
         graph_id = graph.id
