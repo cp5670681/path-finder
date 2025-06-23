@@ -1,5 +1,6 @@
 import math
 from collections import defaultdict
+from datetime import datetime
 from typing import List
 
 from sqlmodel import SQLModel, Field, Relationship
@@ -114,6 +115,13 @@ class TrafficLight(BaseModel, table=True):
 class TrafficLightDelta(BaseModel, table=True):
     __tablename__ = "traffic_light_deltas"
     delta: int
+
+    # 今日是否校准
+    @property
+    def is_today_updated(self):
+        now = datetime.now()
+        updated_at = self.updated_at
+        return now.year == updated_at.year and now.month == updated_at.month and now.day == updated_at.day
 
 # 图
 class Graph(BaseModel, table=True):

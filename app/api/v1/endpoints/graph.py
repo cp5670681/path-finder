@@ -9,6 +9,7 @@ from app.schemas.response_schema import create_response
 
 router = APIRouter()
 
+
 # 最短路径
 @router.get("/fastest_path")
 def fastest_path(id: int, velocity: float, session: Session = Depends(get_session)):
@@ -18,10 +19,12 @@ def fastest_path(id: int, velocity: float, session: Session = Depends(get_sessio
     edge_start_node_ids = [edge["start_node"]["id"] for edge in edges]
     return create_response(data={
         "edges": edges,
-        "wait_times": [{**Node.find(node_id).to_dict(), "wait_time": int(wait_time)} for node_id, wait_time in wait_times.items() if node_id in edge_start_node_ids and wait_time > 0],
+        "wait_times": [{**Node.find(node_id).to_dict(), "wait_time": int(wait_time)} for node_id, wait_time in
+                       wait_times.items() if node_id in edge_start_node_ids and wait_time > 0],
         "all_wait_time": all_wait_time,
         "all_take_time": all_take_time
     })
+
 
 # 列表
 @router.get("/")
@@ -30,13 +33,16 @@ def list_items(session: Session = Depends(get_session)):
     results = [{"id": graph.id, "name": graph.name} for graph in graphs]
     return create_response(data=results)
 
+
 # 详情
 @router.get("/{id}")
 def get_item(id: int, session: Session = Depends(get_session)):
     graph = session.get(Graph, id)
     if graph is None:
         return create_response(data={})
-    return create_response(data=graph.to_json())
+    traffic_light_delta = session.get(TrafficLightDelta, 1)
+    return create_response(data={**graph.to_json(), "is_adjust": traffic_light_delta.is_today_updated})
+
 
 # 红绿灯调整
 @router.post("/adjust")
