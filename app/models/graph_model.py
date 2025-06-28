@@ -11,12 +11,17 @@ from app.models.base_model import BaseModel
 # 节点
 class Node(BaseModel, table=True):
     __tablename__ = "nodes"
-    graph_id: int = Field(foreign_key="graphs.id")
+    graph_id: int = Field(index=True)
     # 经度
     lng: float
     # 纬度
     lat: float
-    graph: "Graph" = Relationship(back_populates="nodes")
+    graph: "Graph" = Relationship(
+        back_populates="nodes",
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(Node.graph_id) == Graph.id"
+        }
+    )
 
     @property
     def label(self):
@@ -29,23 +34,37 @@ class Node(BaseModel, table=True):
 # 边
 class Edge(BaseModel, table=True):
     __tablename__ = "edges"
-    graph_id: int = Field(foreign_key="graphs.id")
+    graph_id: int = Field(index=True)
     # 边的起点
-    start_node_id: int = Field(foreign_key="nodes.id")
+    start_node_id: int = Field(index=True)
     # 边的终点
-    end_node_id: int = Field(foreign_key="nodes.id")
+    end_node_id: int = Field(index=True)
     # 边的长度
     length: float = Field(default=0)
     start_node: "Node" = Relationship(
         # back_populates="start_edges",
-        sa_relationship_kwargs={"foreign_keys": "Edge.start_node_id"}
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(Edge.start_node_id) == Node.id"
+        }
     )
     end_node: "Node" = Relationship(
         # back_populates="end_edges",
-        sa_relationship_kwargs={"foreign_keys": "Edge.end_node_id"}
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(Edge.end_node_id) == Node.id"
+        }
     )
-    graph: "Graph" = Relationship(back_populates="edges")
-    traffic_light: "TrafficLight" = Relationship(back_populates="edge")
+    graph: "Graph" = Relationship(
+        back_populates="edges",
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(Edge.graph_id) == Graph.id"
+        }
+    )
+    traffic_light: "TrafficLight" = Relationship(
+        back_populates="edge",
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(TrafficLight.edge_id) == Edge.id"
+        }
+    )
 
     @property
     def label(self):
@@ -74,7 +93,7 @@ class Edge(BaseModel, table=True):
 
 class TrafficLight(BaseModel, table=True):
     __tablename__ = "traffic_lights"
-    edge_id: int = Field(foreign_key="edges.id")
+    edge_id: int = Field(index=True)
     # 周期
     period: int
     # 通过的间隔
@@ -84,7 +103,9 @@ class TrafficLight(BaseModel, table=True):
 
     edge: "Edge" = Relationship(
         back_populates="traffic_light",
-        sa_relationship_kwargs={"foreign_keys": "TrafficLight.edge_id"}
+        sa_relationship_kwargs={
+            "primaryjoin": "foreign(TrafficLight.edge_id) == Edge.id"
+        }
     )
 
     @property
@@ -129,8 +150,18 @@ class Graph(BaseModel, table=True):
     name: str
     start_node_id: int
     end_node_id: int
-    nodes: List["Node"] = Relationship(back_populates="graph")
-    edges: List["Edge"] = Relationship(back_populates="graph")
+    nodes: List["Node"] = Relationship(
+        back_populates="graph",
+        sa_relationship_kwargs={
+            "primaryjoin": "Graph.id == foreign(Node.graph_id)"
+        }
+    )
+    edges: List["Edge"] = Relationship(
+        back_populates="graph",
+        sa_relationship_kwargs={
+            "primaryjoin": "Graph.id == foreign(Edge.graph_id)"
+        }
+    )
 
     def to_json(self):
         nodes = [node.to_dict() for node in self.nodes]
