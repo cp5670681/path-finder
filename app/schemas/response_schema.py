@@ -4,6 +4,7 @@ from pydantic import BaseModel
 DataType = TypeVar("DataType")
 T = TypeVar("T")
 
+
 class IResponseBase(BaseModel, Generic[T]):
     message: str = ""
     meta: dict | Any | None = {}
@@ -27,16 +28,10 @@ class IDeleteResponseBase(IResponseBase[DataType], Generic[DataType]):
 
 
 def create_response(
-    data: DataType,
-    message: str | None = None,
-    meta: dict | Any | None = {},
+        data: DataType,
+        message: str = "",
+        meta: dict | Any | None = {},
 ) -> (
-    IResponseBase[DataType]
-    | IGetResponseBase[DataType]
-    | IPutResponseBase[DataType]
-    | IDeleteResponseBase[DataType]
-    | IPostResponseBase[DataType]
+        IResponseBase[DataType]
 ):
-    if message is None:
-        return {"data": data, "meta": meta}
-    return {"data": data, "message": message, "meta": meta}
+    return IResponseBase[DataType](data=data, message=message, meta=meta)

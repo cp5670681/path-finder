@@ -44,13 +44,13 @@ edges = [
 
 traffic_lights = [
     # 1号 差57
-    [15, 190, 57, 1750652318],
+    [15, 190, 57, 1750652318, True],
     # 2号 差98
-    [7, 190, 98, 1750652557],
-    [9, 190, 98, 1750652557],
+    [7, 190, 98, 1750652557, True],
+    [9, 190, 98, 1750652557, False],
     # 3号 差58
-    [16, 190, 58, 1750652485],
-    [17, 190, 58, 1750652485],
+    [16, 190, 58, 1750652485, True],
+    [17, 190, 58, 1750652485, False],
 ]
 
 def create_data():
@@ -82,6 +82,7 @@ def create_data():
                 period=traffic_light[1],
                 pass_interval=traffic_light[2],
                 start_moment=traffic_light[3],
+                is_show=traffic_light[4],
             )
             session.add(traffic_light)
         session.commit()
