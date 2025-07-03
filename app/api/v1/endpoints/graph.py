@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 
 from app.api.deps import get_session
 from app.models.graph_model import Graph, Node, TrafficLight, TrafficLightDelta, Edge
-from app.schemas.graph_schema import GraphDetailSchema, FastestPathResponse, TrafficLightSchema
+from app.schemas.graph_schema import GraphDetailSchema, FastestPathResponse, TrafficLightSchema, GraphListSchema
 from app.schemas.response_schema import create_response, IResponseBase
 from app.services.fastest_path import FastestPath
 
@@ -30,14 +30,10 @@ def fastest_path(id: int, velocity: float, session: Session = Depends(get_sessio
 
 
 # 列表
-@router.get("/", response_model=IResponseBase[Sequence[GraphDetailSchema]])
+@router.get("/", response_model=IResponseBase[Sequence[GraphListSchema]])
 def list_items(session: Session = Depends(get_session)) -> IResponseBase[Sequence[Graph]]:
     graphs = session.exec(
         select(Graph)
-        .options(
-            selectinload(Graph.nodes),
-            selectinload(Graph.edges)
-        )
     ).all()
     return create_response(data=graphs)
 

@@ -24,6 +24,10 @@ class EdgeSchema(BaseSchema):
     model_config = ConfigDict(from_attributes=True)
 
 
+class GraphListSchema(BaseSchema):
+    name: str
+
+
 class GraphDetailSchema(BaseSchema):
     name: str
     start_node_id: int
@@ -47,6 +51,10 @@ class FastestPathResponse(BaseModel):
     paths: List[FastestPathItem]
     all_take_time: float
     all_wait_time: float
+
+    # 智能调整速度
+    def adjust_velocity(self):
+        pass
 
 
 class TrafficLightSchema(BaseSchema):
