@@ -1,5 +1,4 @@
-import time
-from typing import List, Sequence, Type
+from typing import Sequence
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import selectinload
@@ -16,7 +15,7 @@ router = APIRouter()
 
 # 最短路径
 @router.get("/fastest_path")
-def fastest_path(id: int, velocity: float, session: Session = Depends(get_session)) -> IResponseBase[FastestPathResponse]:
+def fastest_path(id: int, velocity: float, moment: float, session: Session = Depends(get_session)) -> IResponseBase[FastestPathResponse]:
     graph: Graph | None = session.exec(
         select(Graph)
         .where(Graph.id == id)
@@ -25,7 +24,7 @@ def fastest_path(id: int, velocity: float, session: Session = Depends(get_sessio
         )
     ).first()
     delta = session.get(TrafficLightDelta, 1).delta
-    result = FastestPath(graph).find_fastest_path(time.time(), velocity, delta)
+    result = FastestPath(graph).find_fastest_path(moment, velocity, delta)
     return create_response(data=result)
 
 
