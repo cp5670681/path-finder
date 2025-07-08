@@ -59,7 +59,7 @@ class FastestPathResponse(BaseModel):
 
 class TrafficLightSchema(BaseSchema):
     edge_id: int
-    period: int
+    period: float
     pass_interval: int
     start_moment: int
     end_moment: int

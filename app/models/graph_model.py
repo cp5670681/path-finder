@@ -95,7 +95,7 @@ class TrafficLight(BaseModel, table=True):
     __tablename__ = "traffic_lights"
     edge_id: int = Field(index=True)
     # 周期
-    period: int
+    period: float
     # 通过的间隔
     pass_interval: int
     # 通过开始时刻
